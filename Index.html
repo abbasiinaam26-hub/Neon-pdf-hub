@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon PDF Utility Hub</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* CSS Variables for easy color management (Matching your neon theme) */
+        :root {
+            --neon-blue: #00e5ff;
+            --neon-purple: #ae00ff;
+            --dark-bg: #1a1a2e;
+            --text-color: #e0e0e0;
+            --glow-color: rgba(0, 229, 255, 0.6);
+            --button-bg: linear-gradient(90deg, #00e5ff, #ae00ff);
+            --button-hover-bg: linear-gradient(90deg, #ae00ff, #00e5ff);
+            --input-border: #00e5ff;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            background: var(--dark-bg); 
+            color: var(--text-color);
+            padding: 20px;
+        }
+        
+        .tool-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: rgba(26, 26, 46, 0.85); /* Slightly transparent dark background */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px var(--glow-color), 0 0 60px var(--neon-purple); /* Neon glow effect */
+            border: 2px solid var(--neon-blue);
+            backdrop-filter: blur(8px); /* Frosted glass effect */
+            position: relative;
+        }
+
+        h1 {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+            margin-bottom: 25px;
+            font-size: 2.5em;
+            letter-spacing: 2px;
+        }
+        h2 {
+            color: var(--neon-purple);
+            text-shadow: 0 0 5px var(--neon-purple);
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        p {
+            color: var(--text-color);
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            width: 90%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--text-color);
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 0 5px var(--input-border);
+            transition: all 0.3s ease;
+        }
+        
+        button {
+            background: var(--button-bg);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px var(--glow-color);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: var(--button-hover-bg);
+            box-shadow: 0 0 15px var(--neon-purple);
+            transform: scale(1.03);
+        }
+        
+        hr {
+            border-color: rgba(0, 229, 255, 0.3);
+            margin: 40px 0;
+        }
+        
+        #pdf-output, #img-preview { 
+            margin-top: 20px; 
+            border: 1px dashed rgba(255, 255, 255, 0.3); 
+            padding: 15px; 
+            min-height: 50px;
+            text-align: left;
+            overflow-x: auto;
+        }
+        
+        #pdf-output .page-container, #img-preview a {
+             /* For PDF to Image links */
+            display: inline-block;
+            text-align: center;
+            margin: 10px;
+            vertical-align: top;
+        }
+        
+        #pdf-output img {
+            max-width: 100px;
+            height: auto;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 5px var(--neon-blue);
+        }
+        
+        .success-message {
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px var(--neon-blue);
+            margin-top: 15px;
+        }
+
+        .download-link-style {
+            display: block;
+            color: var(--neon-blue);
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .download-button-style {
+            display: block;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: var(--neon-purple);
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tool-container">
+        <h1>Neon PDF <span>Utility</span> Hub</h1>
+        <p>A multi-functional tool for your document and image conversion needs.</p>
+        
+        <div id="pdf-to-img">
+            <h2>1. Convert PDF to Images (PNG)</h2>
+            <input type="file" id="pdfFile" accept=".pdf" onchange="handlePdfUpload(event)">
+            <p>Upload a PDF. Each page will be extracted and converted to a downloadable PNG image.</p>
+            <div id="pdf-output">
+                </div>
+        </div>
+        
+        <hr>
+
+        <div id="img-to-pdf">
+            <h2>2. Merge Images to PDF</h2>
+            <input type="file" id="imageFiles" accept=".jpg, .jpeg, .png" multiple onchange="handleImageUpload(event)">
+            <p>Select multiple images (JPG or PNG) to combine into one multi-page PDF document.</p>
+            <button onclick="createPdfFromImages()">Generate & Download PDF</button>
+            <div id="img-preview">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Set the path to the PDF worker script manually (required by pdf.js)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // --- PDF TO IMAGE LOGIC (Updated to show individual links) ---
+        const outputDiv = document.getElementById('pdf-output');
+        const loadingTask = (url) => pdfjsLib.getDocument(url);
+
+        async function handlePdfUpload(event) {
+            outputDiv.innerHTML = '<p class="success-message">Processing PDF... please wait...</p>';
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const url = URL.createObjectURL(file);
+                const pdf = await loadingTask(url).promise;
+                
+                outputDiv.innerHTML = ''; 
+                
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: 1.5 });
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    await page.render({canvasContext: context, viewport: viewport}).promise;
+                    
+                    // Convert canvas content to an image link (PNG)
+                    const imgData = canvas.toDataURL('image/png');
+                    
+                    const container = document.createElement('div');
+                    container.className = 'page-container';
+                    
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imgData;
+                    imgElement.alt = `Page ${i}`;
+                    
+                    const link = document.createElement('a');
+                    link.href = imgData;
+                    link.download = `page_${i}_converted.png`;
+                    link.textContent = `Download Page ${i}`;
+                    link.className = 'download-link-style';
+
+                    container.appendChild(imgElement);
+                    container.appendChild(link);
+                    outputDiv.appendChild(
+                    
